@@ -1,20 +1,12 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
 
+import { CashSession } from '../../types/cash_sessions';
+
 interface ModalCreateCashRegisterProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CashRegisterData) => void;
-}
-
-interface CashRegisterData {
-  usuario: string;
-  tienda: string;
-  dineroInicial: number;
-  dineroFinal: number;
-  totalPerdidas: number;
-  fechaTermino: string;
-  observaciones: string;
+  onSubmit: (data: Omit<CashSession, 'id'>) => void;
 }
 
 const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
@@ -22,44 +14,44 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const [formData, setFormData] = React.useState<CashRegisterData>({
-    usuario: '',
-    tienda: 'Dulce Sabor',
-    dineroInicial: 0,
-    dineroFinal: 0,
-    totalPerdidas: 0,
-    fechaTermino: '',
-    observaciones: ''
+  const [formData, setFormData] = React.useState<Omit<CashSession, 'id'>>({
+    user: '',
+    store: 'Dulce Sabor',
+    initial_balance: 0,
+    final_balance: 0,
+    total_loss: 0,
+    closing_date: '',
+    observations: ''
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: ['dineroInicial', 'dineroFinal', 'totalPerdidas'].includes(name) ? 
+      [name]: ['initial_balance', 'final_balance', 'total_loss'].includes(name) ?
               parseFloat(value) || 0 : value
     }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validación adicional
-    if (formData.dineroFinal < formData.dineroInicial) {
+    if (formData.final_balance < formData.initial_balance) {
       alert('El dinero final no puede ser menor que el dinero inicial');
       return;
     }
-    
+
     onSubmit(formData);
     onClose();
     setFormData({
-      usuario: '',
-      tienda: 'Dulce Sabor',
-      dineroInicial: 0,
-      dineroFinal: 0,
-      totalPerdidas: 0,
-      fechaTermino: '',
-      observaciones: ''
+      user: '',
+      store: 'Dulce Sabor',
+      initial_balance: 0,
+      final_balance: 0,
+      total_loss: 0,
+      closing_date: '',
+      observations: ''
     });
   };
 
@@ -85,16 +77,16 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Usuario */}
+              {/* User */}
               <div>
-                <label htmlFor="usuario" className="block text-gray-700 mb-1">
+                <label htmlFor="user" className="block text-gray-700 mb-1">
                   Usuario <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="usuario"
+                  id="user"
                   type="text"
-                  name="usuario"
-                  value={formData.usuario}
+                  name="user"
+                  value={formData.user}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="Nombre del responsable"
@@ -102,15 +94,15 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
                 />
               </div>
 
-              {/* Tienda */}
+              {/* Store */}
               <div>
-                <label htmlFor="tienda" className="block text-gray-700 mb-1">
+                <label htmlFor="store" className="block text-gray-700 mb-1">
                   Tienda <span className="text-red-500">*</span>
                 </label>
                 <select
-                  id="tienda"
-                  name="tienda"
-                  value={formData.tienda}
+                  id="store"
+                  name="store"
+                  value={formData.store}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   required
@@ -121,16 +113,16 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
                 </select>
               </div>
 
-              {/* Dinero Inicial */}
+              {/* Initial Balance */}
               <div>
-                <label htmlFor="dineroInicial" className="block text-gray-700 mb-1">
+                <label htmlFor="initial_balance" className="block text-gray-700 mb-1">
                   Dinero Inicial (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="dineroInicial"
+                  id="initial_balance"
                   type="number"
-                  name="dineroInicial"
-                  value={formData.dineroInicial || ''}
+                  name="initial_balance"
+                  value={formData.initial_balance || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="200.00"
@@ -140,55 +132,55 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
                 />
               </div>
 
-              {/* Dinero Final */}
+              {/* Final Balance */}
               <div>
-                <label htmlFor="dineroFinal" className="block text-gray-700 mb-1">
+                <label htmlFor="final_balance" className="block text-gray-700 mb-1">
                   Dinero Final (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="dineroFinal"
+                  id="final_balance"
                   type="number"
-                  name="dineroFinal"
-                  value={formData.dineroFinal || ''}
+                  name="final_balance"
+                  value={formData.final_balance || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="500.00"
                   step="0.01"
-                  min={formData.dineroInicial}
+                  min={formData.initial_balance}
                   required
                 />
               </div>
 
-              {/* Total Pérdidas */}
+              {/* Total Loss */}
               <div>
-                <label htmlFor="totalPerdidas" className="block text-gray-700 mb-1">
+                <label htmlFor="total_loss" className="block text-gray-700 mb-1">
                   Total Pérdidas (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="totalPerdidas"
+                  id="total_loss"
                   type="number"
-                  name="totalPerdidas"
-                  value={formData.totalPerdidas || ''}
+                  name="total_loss"
+                  value={formData.total_loss || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="20.00"
                   step="0.01"
                   min="0"
-                  max={formData.dineroInicial}
+                  max={formData.initial_balance}
                   required
                 />
               </div>
 
-              {/* Fecha de Término */}
+              {/* Closing Date */}
               <div>
-                <label htmlFor="fechaTermino" className="block text-gray-700 mb-1">
+                <label htmlFor="closing_date" className="block text-gray-700 mb-1">
                   Fecha de Término <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="fechaTermino"
+                  id="closing_date"
                   type="date"
-                  name="fechaTermino"
-                  value={formData.fechaTermino}
+                  name="closing_date"
+                  value={formData.closing_date}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   required
@@ -197,15 +189,15 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
               </div>
             </div>
 
-            {/* Observaciones */}
+            {/* Observations */}
             <div>
-              <label htmlFor="observaciones" className="block text-gray-700 mb-1">
+              <label htmlFor="observations" className="block text-gray-700 mb-1">
                 Observaciones <span className="text-red-500">*</span>
               </label>
               <textarea
-                id="observaciones"
-                name="observaciones"
-                value={formData.observaciones}
+                id="observations"
+                name="observations"
+                value={formData.observations}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                 rows={3}
