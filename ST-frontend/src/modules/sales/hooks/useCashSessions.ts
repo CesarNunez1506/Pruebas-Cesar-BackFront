@@ -36,12 +36,14 @@ const useCashSessions = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create cash session');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to create cash session');
       }
 
       const newSession = await response.json();
       setCashSessions((prevSessions) => [...prevSessions, newSession]);
     } catch (error) {
+      console.error('Error creating cash session:', error);
       setError(error.message);
     }
   };
