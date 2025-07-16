@@ -61,8 +61,8 @@ const ProductionView = () => {
   };
 
   // Lógica para aplicar los filtros
-  const handleApplyFilters = (filters: { startDate: string; endDate: string; plant: string }) => {
-    const { startDate, endDate, plant } = filters;
+  const handleApplyFilters = (filters: { startDate: string; endDate: string; plant: string; product: string }) => {
+    const { startDate, endDate, plant, product } = filters;
 
     const filtered = productions?.filter((production) => {
       const productionDate = new Date(production.productionDate); // Fecha de producción
@@ -70,8 +70,9 @@ const ProductionView = () => {
         (!startDate || productionDate >= new Date(startDate)) &&
         (!endDate || productionDate <= new Date(endDate));
       const matchesPlant = !plant || production.plant_id === plant;
+      const matchesProduct = !product || production.productId === product;
 
-      return isWithinDateRange && matchesPlant;
+      return isWithinDateRange && matchesPlant && matchesProduct;
     });
 
     setFilteredProductions(filtered || []);

@@ -1,19 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useFetchProducts } from '../../hook/useProducts';
+import { Product } from '../../types/products';
 
 interface ModalFilterProductionProps {
   isOpen: boolean;
   onClose: () => void;
   plants: { id: string; name: string }[];
-  onFilter: (filters: { startDate: string; endDate: string; plant: string }) => void;
+  onFilter: (filters: { startDate: string; endDate: string; plant: string; product: string }) => void;
 }
 
 const ModalFilterProduction: React.FC<ModalFilterProductionProps> = ({ isOpen, onClose, plants, onFilter }) => {
+  const { data: products, isLoading: loadingProducts } = useFetchProducts();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [selectedPlant, setSelectedPlant] = useState('');
+  const [selectedProduct, setSelectedProduct] = useState('');
 
   const handleApplyFilters = () => {
-    onFilter({ startDate, endDate, plant: selectedPlant });
+    onFilter({ startDate, endDate, plant: selectedPlant, product: selectedProduct });
     onClose();
   };
 
@@ -54,6 +58,22 @@ const ModalFilterProduction: React.FC<ModalFilterProductionProps> = ({ isOpen, o
                 {plants.map((plant) => (
                   <option key={plant.id} value={plant.id}>
                     {plant.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Producto</label>
+              <select
+                value={selectedProduct}
+                onChange={(e) => setSelectedProduct(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={loadingProducts}
+              >
+                <option value="">Todos los productos</option>
+                {products?.map((product: Product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.name}
                   </option>
                 ))}
               </select>
