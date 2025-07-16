@@ -1,27 +1,18 @@
 import React, { useState } from 'react';
 import { FiInfo, FiMapPin, FiHome, FiClipboard, FiDollarSign, FiPlus } from 'react-icons/fi';
 import ModalCreateCashRegister from './modal-create-cashregister';
-
-interface CashRegisterData {
-  usuario: string;
-  tienda: string;
-  dineroInicial: number;
-  dineroFinal: number;
-  totalPerdidas: number;
-  fechaTermino: string;
-  observaciones: string;
-}
+import { useCashSession } from '../../hooks/use-cash-session.hook';
+import { CashSession } from '../../types/cash_sessions';
 
 const InformationComponentView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { createCashSession, loading, error } = useCashSession();
 
-  const handleCreateCashRegister = (data: CashRegisterData) => {
-    console.log('Registro de caja completado:', {
-      ...data,
-      fechaRegistro: new Date().toISOString()
-    });
-    // Aquí iría la llamada a la API para guardar el registro
-    alert(`Cierre de caja registrado exitosamente!\nUsuario: ${data.usuario}\nTotal Final: S/${data.dineroFinal.toFixed(2)}`);
+  const handleCreateCashRegister = async (data: Omit<CashSession, 'id' | 'created_at' | 'updated_at'>) => {
+    const response = await createCashSession(data);
+    if (response) {
+      alert(`Cierre de caja registrado exitosamente!`);
+    }
   };
 
   return (

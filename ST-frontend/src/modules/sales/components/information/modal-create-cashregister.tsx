@@ -1,20 +1,11 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
+import { CashSession } from '../../types/cash_sessions';
 
 interface ModalCreateCashRegisterProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: CashRegisterData) => void;
-}
-
-interface CashRegisterData {
-  usuario: string;
-  tienda: string;
-  dineroInicial: number;
-  dineroFinal: number;
-  totalPerdidas: number;
-  fechaTermino: string;
-  observaciones: string;
+  onSubmit: (data: Omit<CashSession, 'id' | 'created_at' | 'updated_at'>) => void;
 }
 
 const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
@@ -22,21 +13,20 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const [formData, setFormData] = React.useState<CashRegisterData>({
-    usuario: '',
-    tienda: 'Dulce Sabor',
-    dineroInicial: 0,
-    dineroFinal: 0,
-    totalPerdidas: 0,
-    fechaTermino: '',
-    observaciones: ''
+  const [formData, setFormData] = React.useState({
+    user_id: 1, // Hardcoded user_id for now
+    store_id: 1, // Hardcoded store_id for now
+    start_amount: 0,
+    end_amount: 0,
+    total_returns: 0,
+    ended_at: new Date(),
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: ['dineroInicial', 'dineroFinal', 'totalPerdidas'].includes(name) ? 
+      [name]: ['start_amount', 'end_amount', 'total_returns'].includes(name) ?
               parseFloat(value) || 0 : value
     }));
   };
@@ -44,22 +34,23 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validación adicional
-    if (formData.dineroFinal < formData.dineroInicial) {
+    if (formData.end_amount < formData.start_amount) {
       alert('El dinero final no puede ser menor que el dinero inicial');
       return;
     }
     
-    onSubmit(formData);
+    onSubmit({
+        ...formData,
+        ended_at: new Date(formData.ended_at)
+    });
     onClose();
     setFormData({
-      usuario: '',
-      tienda: 'Dulce Sabor',
-      dineroInicial: 0,
-      dineroFinal: 0,
-      totalPerdidas: 0,
-      fechaTermino: '',
-      observaciones: ''
+        user_id: 1,
+        store_id: 1,
+        start_amount: 0,
+        end_amount: 0,
+        total_returns: 0,
+        ended_at: new Date(),
     });
   };
 
@@ -85,52 +76,16 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Usuario */}
+              {/* Start Amount */}
               <div>
-                <label htmlFor="usuario" className="block text-gray-700 mb-1">
-                  Usuario <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="usuario"
-                  type="text"
-                  name="usuario"
-                  value={formData.usuario}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder="Nombre del responsable"
-                  required
-                />
-              </div>
-
-              {/* Tienda */}
-              <div>
-                <label htmlFor="tienda" className="block text-gray-700 mb-1">
-                  Tienda <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="tienda"
-                  name="tienda"
-                  value={formData.tienda}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                >
-                  <option value="Dulce Sabor">Dulce Sabor</option>
-                  <option value="Sucursal Norte">Sucursal Norte</option>
-                  <option value="Sucursal Sur">Sucursal Sur</option>
-                </select>
-              </div>
-
-              {/* Dinero Inicial */}
-              <div>
-                <label htmlFor="dineroInicial" className="block text-gray-700 mb-1">
+                <label htmlFor="start_amount" className="block text-gray-700 mb-1">
                   Dinero Inicial (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="dineroInicial"
+                  id="start_amount"
                   type="number"
-                  name="dineroInicial"
-                  value={formData.dineroInicial || ''}
+                  name="start_amount"
+                  value={formData.start_amount || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="200.00"
@@ -140,78 +95,60 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
                 />
               </div>
 
-              {/* Dinero Final */}
+              {/* End Amount */}
               <div>
-                <label htmlFor="dineroFinal" className="block text-gray-700 mb-1">
+                <label htmlFor="end_amount" className="block text-gray-700 mb-1">
                   Dinero Final (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="dineroFinal"
+                  id="end_amount"
                   type="number"
-                  name="dineroFinal"
-                  value={formData.dineroFinal || ''}
+                  name="end_amount"
+                  value={formData.end_amount || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="500.00"
                   step="0.01"
-                  min={formData.dineroInicial}
+                  min={formData.start_amount}
                   required
                 />
               </div>
 
-              {/* Total Pérdidas */}
+              {/* Total Returns */}
               <div>
-                <label htmlFor="totalPerdidas" className="block text-gray-700 mb-1">
-                  Total Pérdidas (S/) <span className="text-red-500">*</span>
+                <label htmlFor="total_returns" className="block text-gray-700 mb-1">
+                  Total Devoluciones (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="totalPerdidas"
+                  id="total_returns"
                   type="number"
-                  name="totalPerdidas"
-                  value={formData.totalPerdidas || ''}
+                  name="total_returns"
+                  value={formData.total_returns || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="20.00"
                   step="0.01"
                   min="0"
-                  max={formData.dineroInicial}
                   required
                 />
               </div>
 
-              {/* Fecha de Término */}
+              {/* Ended At */}
               <div>
-                <label htmlFor="fechaTermino" className="block text-gray-700 mb-1">
+                <label htmlFor="ended_at" className="block text-gray-700 mb-1">
                   Fecha de Término <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="fechaTermino"
+                  id="ended_at"
                   type="date"
-                  name="fechaTermino"
-                  value={formData.fechaTermino}
+                  name="ended_at"
+                  value={formData.ended_at.toISOString().split('T')[0]}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   required
                   max={new Date().toISOString().split('T')[0]} // No permite fechas futuras
                 />
               </div>
-            </div>
-
-            {/* Observaciones */}
-            <div>
-              <label htmlFor="observaciones" className="block text-gray-700 mb-1">
-                Observaciones <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="observaciones"
-                name="observaciones"
-                value={formData.observaciones}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                rows={3}
-                placeholder="Detalles sobre diferencias, incidentes o comentarios relevantes"
-                required
-              ></textarea>
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">
