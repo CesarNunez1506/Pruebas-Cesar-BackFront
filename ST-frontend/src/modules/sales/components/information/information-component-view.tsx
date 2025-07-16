@@ -1,16 +1,30 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FiInfo, FiMapPin, FiHome, FiClipboard, FiDollarSign, FiPlus } from 'react-icons/fi';
 import ModalCreateCashRegister from './modal-create-cashregister';
-import useCashSessions from '../../hooks/useCashSessions';
-import { CashSession } from '../../types/cash_sessions';
+import { CashSession } from '@/modules/sales/models/cash-session.model';
+import useCashSession from '../../hooks/useCashSession';
+
+interface CashRegisterData {
+  usuario: string;
+  tienda: string;
+  dineroInicial: number;
+  dineroFinal: number;
+  totalPerdidas: number;
+  fechaTermino: string;
+  observaciones: string;
+}
 
 const InformationComponentView: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { cashSessions, loading, error, createCashSession } = useCashSessions();
+  const { cashSessions, fetchCashSessions, createCashSession } = useCashSession();
 
-  const handleCreateCashRegister = (data: Omit<CashSession, 'id'>) => {
-    createCashSession(data);
-    setIsModalOpen(false);
+  useEffect(() => {
+    fetchCashSessions();
+  }, []);
+
+  const handleCreateCashRegister = async (data: Omit<CashSession, 'id'>) => {
+    await createCashSession(data);
+    fetchCashSessions();
   };
 
   return (
@@ -75,35 +89,14 @@ const InformationComponentView: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {loading && (
-              <tr>
-                <td colSpan={6} className="text-center py-4">
-                  Loading...
-                </td>
-              </tr>
-            )}
-            {error && (
-              <tr>
-                <td colSpan={6} className="text-center py-4 text-red-500">
-                  {error}
-                </td>
-              </tr>
-            )}
-            {!loading && !error && cashSessions.length === 0 && (
-              <tr>
-                <td colSpan={6} className="text-center py-4">
-                  No hay ningún cierre de caja
-                </td>
-              </tr>
-            )}
             {cashSessions.map((session) => (
               <tr key={session.id} className="border-t">
-                <td className="px-4 py-2 text-center">{session.user}</td>
-                <td className="px-4 py-2 text-center">{session.store}</td>
-                <td className="px-4 py-2 text-center">S/ {session.initial_balance.toFixed(2)}</td>
-                <td className="px-4 py-2 text-center">S/ {session.final_balance.toFixed(2)}</td>
-                <td className="px-4 py-2 text-center">S/ {session.total_loss.toFixed(2)}</td>
-                <td className="px-4 py-2 text-center">{new Date(session.closing_date).toLocaleDateString()}</td>
+                <td className="px-4 py-2 text-center">{session.user_id}</td>
+                <td className="px-4 py-2 text-center">{session.store_id}</td>
+                <td className="px-4 py-2 text-center">S/ {session.start_amount.toFixed(2)}</td>
+                <td className="px-4 py-2 text-center">S/ {session.end_amount.toFixed(2)}</td>
+                <td className="px-4 py-2 text-center">S/ {session.total_returns.toFixed(2)}</td>
+                <td className="px-4 py-2 text-center">{new Date(session.ended_at).toLocaleDateString()}</td>
               </tr>
             ))}
           </tbody>

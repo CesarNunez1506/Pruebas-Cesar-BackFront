@@ -1,7 +1,6 @@
 import React from 'react';
 import { FiX } from 'react-icons/fi';
-
-import { CashSession } from '../../types/cash_sessions';
+import { CashSession } from '../../models/cash-session.model';
 
 interface ModalCreateCashRegisterProps {
   isOpen: boolean;
@@ -15,20 +14,19 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
   onSubmit,
 }) => {
   const [formData, setFormData] = React.useState<Omit<CashSession, 'id'>>({
-    user: '',
-    store: 'Dulce Sabor',
-    initial_balance: 0,
-    final_balance: 0,
-    total_loss: 0,
-    closing_date: '',
-    observations: ''
+    user_id: 1, // Hardcoded user_id
+    store_id: 1, // Hardcoded store_id
+    start_amount: 0,
+    end_amount: 0,
+    total_returns: 0,
+    ended_at: new Date()
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: ['initial_balance', 'final_balance', 'total_loss'].includes(name) ?
+      [name]: ['start_amount', 'end_amount', 'total_returns'].includes(name) ?
               parseFloat(value) || 0 : value
     }));
   };
@@ -37,7 +35,7 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
     e.preventDefault();
 
     // Validación adicional
-    if (formData.final_balance < formData.initial_balance) {
+    if (formData.end_amount < formData.start_amount) {
       alert('El dinero final no puede ser menor que el dinero inicial');
       return;
     }
@@ -45,13 +43,12 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
     onSubmit(formData);
     onClose();
     setFormData({
-      user: '',
-      store: 'Dulce Sabor',
-      initial_balance: 0,
-      final_balance: 0,
-      total_loss: 0,
-      closing_date: '',
-      observations: ''
+      user_id: 1,
+      store_id: 1,
+      start_amount: 0,
+      end_amount: 0,
+      total_returns: 0,
+      ended_at: new Date()
     });
   };
 
@@ -77,52 +74,16 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* User */}
+              {/* Dinero Inicial */}
               <div>
-                <label htmlFor="user" className="block text-gray-700 mb-1">
-                  Usuario <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="user"
-                  type="text"
-                  name="user"
-                  value={formData.user}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  placeholder="Nombre del responsable"
-                  required
-                />
-              </div>
-
-              {/* Store */}
-              <div>
-                <label htmlFor="store" className="block text-gray-700 mb-1">
-                  Tienda <span className="text-red-500">*</span>
-                </label>
-                <select
-                  id="store"
-                  name="store"
-                  value={formData.store}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                  required
-                >
-                  <option value="Dulce Sabor">Dulce Sabor</option>
-                  <option value="Sucursal Norte">Sucursal Norte</option>
-                  <option value="Sucursal Sur">Sucursal Sur</option>
-                </select>
-              </div>
-
-              {/* Initial Balance */}
-              <div>
-                <label htmlFor="initial_balance" className="block text-gray-700 mb-1">
+                <label htmlFor="start_amount" className="block text-gray-700 mb-1">
                   Dinero Inicial (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="initial_balance"
+                  id="start_amount"
                   type="number"
-                  name="initial_balance"
-                  value={formData.initial_balance || ''}
+                  name="start_amount"
+                  value={formData.start_amount || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="200.00"
@@ -132,78 +93,61 @@ const ModalCreateCashRegister: React.FC<ModalCreateCashRegisterProps> = ({
                 />
               </div>
 
-              {/* Final Balance */}
+              {/* Dinero Final */}
               <div>
-                <label htmlFor="final_balance" className="block text-gray-700 mb-1">
+                <label htmlFor="end_amount" className="block text-gray-700 mb-1">
                   Dinero Final (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="final_balance"
+                  id="end_amount"
                   type="number"
-                  name="final_balance"
-                  value={formData.final_balance || ''}
+                  name="end_amount"
+                  value={formData.end_amount || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="500.00"
                   step="0.01"
-                  min={formData.initial_balance}
+                  min={formData.start_amount}
                   required
                 />
               </div>
 
-              {/* Total Loss */}
+              {/* Total Pérdidas */}
               <div>
-                <label htmlFor="total_loss" className="block text-gray-700 mb-1">
+                <label htmlFor="total_returns" className="block text-gray-700 mb-1">
                   Total Pérdidas (S/) <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="total_loss"
+                  id="total_returns"
                   type="number"
-                  name="total_loss"
-                  value={formData.total_loss || ''}
+                  name="total_returns"
+                  value={formData.total_returns || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   placeholder="20.00"
                   step="0.01"
                   min="0"
-                  max={formData.initial_balance}
+                  max={formData.start_amount}
                   required
                 />
               </div>
 
-              {/* Closing Date */}
+              {/* Fecha de Término */}
               <div>
-                <label htmlFor="closing_date" className="block text-gray-700 mb-1">
+                <label htmlFor="ended_at" className="block text-gray-700 mb-1">
                   Fecha de Término <span className="text-red-500">*</span>
                 </label>
                 <input
-                  id="closing_date"
+                  id="ended_at"
                   type="date"
-                  name="closing_date"
-                  value={formData.closing_date}
+                  name="ended_at"
+                  value={formData.ended_at.toString().split('T')[0]}
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
                   required
                   max={new Date().toISOString().split('T')[0]} // No permite fechas futuras
                 />
               </div>
-            </div>
-
-            {/* Observations */}
-            <div>
-              <label htmlFor="observations" className="block text-gray-700 mb-1">
-                Observaciones <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="observations"
-                name="observations"
-                value={formData.observations}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                rows={3}
-                placeholder="Detalles sobre diferencias, incidentes o comentarios relevantes"
-                required
-              ></textarea>
             </div>
 
             <div className="flex justify-end space-x-3 pt-4">
