@@ -89,6 +89,13 @@ const InformationComponentView: React.FC = () => {
                 </td>
               </tr>
             )}
+            {!loading && !error && cashSessions.length === 0 && (
+              <tr>
+                <td colSpan={6} className="text-center py-4">
+                  No hay ningún cierre de caja
+                </td>
+              </tr>
+            )}
             {cashSessions.map((session) => (
               <tr key={session.id} className="border-t">
                 <td className="px-4 py-2 text-center">{session.user}</td>
