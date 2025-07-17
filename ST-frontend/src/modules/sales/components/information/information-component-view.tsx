@@ -2,27 +2,18 @@ import React, { useState } from 'react';
 import { FiInfo, FiMapPin, FiHome, FiClipboard, FiDollarSign, FiPlus } from 'react-icons/fi';
 import { StoreAttributes } from '@/modules/stores/types/store';
 import ModalCreateCashRegister from './modal-create-cashregister';
-
-interface CashRegisterData {
-  usuario: string;
-  tienda: string;
-  dineroInicial: number;
-  dineroFinal: number;
-  totalPerdidas: number;
-  fechaTermino: string;
-  observaciones: string;
-}
-
+import { useCashSession } from '../../hooks/useCashSession';
+import { CashSessionAttributes } from '../../types/cash_session.types';
 interface InformationComponentViewProps {
   selectedStore?: StoreAttributes | null;
 }
 
 const InformationComponentView: React.FC<InformationComponentViewProps> = ({ selectedStore }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { cashSessions, createCashSession } = useCashSession();
 
-  const handleCreateCashRegister = (data: CashRegisterData) => {
-    console.log('Datos del cierre de caja:', data);
-    // Aquí iría la lógica para crear el registro de cierre de caja
+  const handleCreateCashRegister = (data: Omit<CashSessionAttributes, 'id'>) => {
+    createCashSession(data);
     setIsModalOpen(false);
   };
 
@@ -97,22 +88,18 @@ const InformationComponentView: React.FC<InformationComponentViewProps> = ({ sel
             </tr>
           </thead>
           <tbody>
-            <tr className="border-t">
-              <td className="px-4 py-2 text-center">Juan Pérez</td>
-              <td className="px-4 py-2 text-center">Dulce Sabor</td>
-              <td className="px-4 py-2 text-center">S/ 200.00</td>
-              <td className="px-4 py-2 text-center">S/ 500.00</td>
-              <td className="px-4 py-2 text-center">S/ 20.00</td>
-              <td className="px-4 py-2 text-center">12/07/2025</td>
-            </tr>
-            <tr className="border-t bg-gray-50">
-              <td className="px-4 py-2 text-center">María López</td>
-              <td className="px-4 py-2 text-center">Dulce Sabor</td>
-              <td className="px-4 py-2 text-center">S/ 300.00</td>
-              <td className="px-4 py-2 text-center">S/ 700.00</td>
-              <td className="px-4 py-2 text-center">S/ 15.00</td>
-              <td className="px-4 py-2 text-center">13/07/2025</td>
-            </tr>
+            {cashSessions
+              ?.filter((session) => session.store_id === selectedStore?.id)
+              .map((session) => (
+                <tr key={session.id} className="border-t">
+                  <td className="px-4 py-2 text-center">{session.user_id}</td>
+                  <td className="px-4 py-2 text-center">{selectedStore?.store_name}</td>
+                  <td className="px-4 py-2 text-center">S/ {session.start_amount.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-center">S/ {session.end_amount.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-center">S/ {session.total_returns.toFixed(2)}</td>
+                  <td className="px-4 py-2 text-center">{new Date(session.ended_at).toLocaleDateString()}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
